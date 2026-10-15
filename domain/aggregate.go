@@ -1,14 +1,14 @@
 package domain
 
-type Aggregate[T any] interface {
+type Aggregate[T any, E any] interface {
 	Entity[T]
-	AddEvent(event any)
-	PendingEvents() []any
+	AddEvent(event DomainEvent[any, T])
+	PendingEvents() []DomainEvent[any, T]
 }
 
 type aggregate[T any] struct {
 	Entity[T]
-	pendingEvents []any
+	pendingEvents []DomainEvent[any, T]
 }
 
 func NewAggregate[T any](id T, meta ...*Meta) Aggregate[T] {
@@ -20,5 +20,7 @@ func NewAggregateNoID[T any](meta ...*Meta) Aggregate[T] {
 func RestoreAggregate[T any](id T, meta ...*Meta) Aggregate[T] {
 	return &aggregate[T]{RestoreEntity(id, meta...), nil}
 }
-func (a *aggregate[T]) PendingEvents() []any { return a.pendingEvents }
-func (a *aggregate[T]) AddEvent(event any)   { a.pendingEvents = append(a.pendingEvents, event) }
+func (a *aggregate[T]) PendingEvents() []DomainEvent[any, T] { return a.pendingEvents }
+func (a *aggregate[T]) AddEvent(event DomainEvent[any, T]) {
+	a.pendingEvents = append(a.pendingEvents, event)
+}
